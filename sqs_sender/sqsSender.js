@@ -8,8 +8,6 @@ var queUrl = URL.getUrl(inName);
 var resQueUrl = URL.getUrl(resName);
 
 AWS.config.update({
-    "accessKeyId": "AKIAJW66E6QSMI6DEVEQ",
-    "secretAccessKey": "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",
     "region": "us-east-1"
 });
 
