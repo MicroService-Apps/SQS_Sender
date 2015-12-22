@@ -1,11 +1,16 @@
 var AWS = require('aws-sdk');
 var uuid = require('node-uuid');
 var URL = require('../config/url');
+var fs = require('fs');
 
-var inName = 'FinanceInputQueue';
-var resName = 'FinanceResponseQueue';
-var queUrl = URL.getUrl(inName);
-var resQueUrl = URL.getUrl(resName);
+var serviceName = process.argv[2];
+var queUrl = URL.getInQueUrl(serviceName);
+var resQueUrl = URL.getResQueUrl(serviceName);
+
+if(queUrl == null) {
+    console.log("Service doesn't exist");
+    return;
+}
 
 AWS.config.update({
     "region": "us-east-1"
@@ -13,21 +18,12 @@ AWS.config.update({
 
 var sqs = new AWS.SQS();
 var corrId = uuid();
+var msg = JSON.parse(fs.readFileSync('./input_message/inputMessage.json', 'utf8'));
+msg.Req.Header.CID = corrId;
 
-var msg = {
-    Req: {
-        Header: {
-            OP: 'read',
-            ID: 'sss',
-            RQ: 'FinanceResponseQueue',
-            CID: corrId
-        },
-        Body: {
-            //name: 'xxx',
-            //instructor: 'zzz'
-        }
-    }
-};
+console.log("******** Sent Message ************************************************* ");
+console.log(JSON.stringify(msg, null, 2));
+console.log("*********************************************************************** \n");
 
 var sqsParams = {
     MessageBody: JSON.stringify(msg),
@@ -63,7 +59,11 @@ function receiveMessageCallback(err, data) {
             var receivedCorrId = message['Res']['Header']['CID'];
 
             if(receivedCorrId == corrId) {
-                console.log(message);
+                message.Res.Body = JSON.parse(message.Res.Body);
+
+                console.log("******** Received Message ********************************************* ");
+                console.log(JSON.stringify(message, null, 2));
+                console.log("*********************************************************************** \n");
             }
 
             // Delete the message when we've successfully processed it

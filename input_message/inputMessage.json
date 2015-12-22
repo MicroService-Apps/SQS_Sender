@@ -1,0 +1,12 @@
+{
+  "Req": {
+    "Header": {
+      "OP": "read",
+      "ID": "a124",
+      "RQ": "K12ResponseQueue",
+      "CID": "corrId"
+    },
+    "Body": {
+    }
+  }
+}
